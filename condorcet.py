@@ -1,52 +1,43 @@
-"""
-Condorcet's voters:
-
-We analyse the behaviour of majority decisions by
-estimating the probability of such decisions being
-correct on a range of population sizes.
-
-Assumptions:
-
-- There are only 2 options being voted for, of which 
-one is correct.
-- Each voter in our pool has a correct probability of 
-a normal distribution with mean = p and variance = epsilon.
-- The probability of a population's majority being correct is estimated 
-with 3000 runs on that population.
-"""
-
+from scipy.special import comb
+from itertools import combinations
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def condorcet(pool, p = .65, epsilon = .05, run = 3000):
+ReLU = lambda x: np.maximum(0, x)
+filtered = lambda X: np.array([np.minimum(ReLU(x), 1) for x in X])
+complement = lambda whole, part: [x for x in whole if x not in part]
 
-  correct_majority_count = 0
 
-  for sample_count in range(run):
+def condorcet(n, p = .65, epsilon = .01):
 
-    votes = np.random.rand(pool)
-    thresholds = p + epsilon*np.random.randn(pool)
-      
-    correct_voters = [vote for number, vote in enumerate(votes) if 
-                        vote < thresholds[number]] 
+  p_correct_majority = 0
 
-    correct_majority_count += 1 if 2*len(correct_voters) > pool else 0
+  # vanilla theorem
+  
+  if not epsilon:
+    for i in range(n//2 + 1, n + 1):
+      p_correct_majority += comb(n, i)*p**(i)*(1-p)**(n - i)
 
-    p_correct_majority = correct_majority_count/float(run)
+
+  # with Gaussian distribution
+
+  else:
+    
+    competence_profile = filtered(p + epsilon*np.random.randn(n))
+    opposite_competence_profile = 1 - competence_profile
+
+    for i in range(n//2 + 1, n + 1):
+
+      Ci = list(combinations(competence_profile, i))
+      Ci_index = list(combinations(range(len(competence_profile)), i))
+
+      for index, combination in enumerate(Ci):
+
+        prod = np.prod(combination)
+        complement_index = complement(range(n),Ci_index[index])
+        for pm in complement_index:
+          prod *= opposite_competence_profile[pm]
+
+        p_correct_majority += prod
 
   return p_correct_majority
-
-majority_correctness = []
-
-for pool in range(100):
-  majority_correctness.append(condorcet(pool))
-
-plt.figure(figsize = (16,9))
-
-plt.plot(range(100), majority_correctness)
-plt.title('p = .65, epsilon = .05')
-plt.ylabel('Probability that majority vote is correct')
-plt.xlabel('Number of voters')
-
-plt.show()
