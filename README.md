@@ -1,8 +1,6 @@
 # Condorcet's voters
 
 **Condorcet's jury theorem**, a work of French philosopher and mathematician Marquis de Condorcet, describes 
-the behaviour of majority decisions corresponding to population sizes under certain assumptions. In this project,
-I aim to understand more about the theorem by investigating a generalization of it. More details are described in [this post]
-on my website.
+the behaviour of majority decisions corresponding to population sizes under certain assumptions. This repository contains the source code for my blog post [here], where I give some of my insights into the theorem.
 
-[this post]: https://minnq.github.io/miscellaneous/2019/11/12/condorcet/
+[here]: https://minnq.github.io/website/simple%20things/2019-11-12/condorcet.html
